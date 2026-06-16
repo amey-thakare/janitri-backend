@@ -36,3 +36,10 @@ python3 app.py
 Server:
 
 http://127.0.0.1:8000
+
+
+GET /patients
+GET /latest/P123
+GET /history/P123
+GET /waveform/P123
+POST /upload-waveform
