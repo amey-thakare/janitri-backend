@@ -4,3 +4,4 @@ __pycache__/
 .env
 .DS_Store
 janitri.db
+cnn_sdp_model.h5
