@@ -7,7 +7,7 @@ from datetime import datetime
 API_URL = "http://127.0.0.1:8000/upload-waveform"
 
 DEVICE_ID = "JAN001"
-PATIENT_ID = "P123"
+PATIENT_ID = "P001"
 
 # Load waveforms
 with open("sample_waveforms.json", "r") as f:

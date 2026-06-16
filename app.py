@@ -1,18 +1,15 @@
 from flask import Flask, request, jsonify
 from tensorflow.keras.models import load_model
 import numpy as np
-import sqlite3
 import os
 import json
 import database
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "postgresql://janitri_user:janitri123@localhost/janitri_db"
-)
+from config import Config
 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config.from_object(Config)
 
 db = SQLAlchemy(app)
 class Patient(db.Model):
@@ -251,23 +248,6 @@ def get_patients():
         }
         for p in patients
     ])
-
-    rows = cursor.fetchall()
-
-    conn.close()
-
-    patients = []
-
-    for row in rows:
-        patients.append({
-            "patient_id": row[0],
-            "name": row[1],
-            "age": row[2],
-            "gestational_week": row[3]
-        })
-
-    return jsonify(patients)
-
 @app.route("/sdp-trend/<patient_id>", methods=["GET"])
 def sdp_trend(patient_id):
 
