@@ -1,28 +1,43 @@
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    Text
+)
 
-db = SQLAlchemy()
+from models.base import Base
 
-class Prediction(db.Model):
+class Prediction(Base):
+
     __tablename__ = "predictions"
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
+    id = Column(
+        Integer,
+        primary_key=True,
+        autoincrement=True
     )
 
-    patient_id = db.Column(db.String(50))
-    device_id = db.Column(db.String(50))
-
-    sdp = db.Column(db.Float)
-
-    status = db.Column(
-        db.String(20)
+    patient_id = Column(
+        String(50)
     )
 
-    waveform = db.Column(
-        db.Text
+    device_id = Column(
+        String(50)
     )
 
-    timestamp = db.Column(
-        db.String(50)
+    sdp = Column(
+        Float
+    )
+
+    status = Column(
+        String(20)
+    )
+
+    waveform = Column(
+        Text
+    )
+
+    timestamp = Column(
+        String(50)
     )
