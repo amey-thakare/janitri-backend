@@ -4,7 +4,7 @@ import random
 import time
 from datetime import datetime
 
-API_URL = "http://127.0.0.1:8000/upload-waveform"
+API_URL = "https://janitri-backend-3yn0.onrender.com/upload-waveform"
 
 DEVICE_ID = "JAN001"
 PATIENT_ID = "P001"

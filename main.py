@@ -74,6 +74,25 @@ def upload_waveform(data: WaveformRequest):
             if 2 <= sdp <= 8
             else "ABNORMAL"
         )
+        patient = (
+        db.query(Patient)
+        .filter(
+        Patient.patient_id == data.patient_id
+        )
+            .first()
+    )
+
+        if not patient:
+
+            patient = Patient(
+            patient_id=data.patient_id,
+            name="Test Patient",
+            age=28,
+            gestational_week=34
+            )
+
+            db.add(patient)
+            db.commit()
 
         record = Prediction(
             patient_id=data.patient_id,
