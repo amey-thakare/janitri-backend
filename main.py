@@ -149,15 +149,11 @@ def latest_prediction(patient_id: str):
     try:
 
         prediction = (
-            db.query(Prediction)
-            .filter(
-                Prediction.patient_id == patient_id
-            )
-            .order_by(
-                Prediction.id.desc()
-            )
-            .first()
+        db.query(Prediction)
+        .order_by(Prediction.id.desc())
+        .first()
         )
+    
 
         if not prediction:
             raise HTTPException(
@@ -216,12 +212,7 @@ def waveform(patient_id: str):
 
         prediction = (
             db.query(Prediction)
-            .filter(
-                Prediction.patient_id == patient_id
-            )
-            .order_by(
-                Prediction.id.desc()
-            )
+            .order_by(Prediction.id.desc())
             .first()
         )
 
@@ -232,9 +223,7 @@ def waveform(patient_id: str):
             )
 
         return {
-            "signal": json.loads(
-                prediction.waveform
-            )
+            "signal": json.loads(prediction.waveform)
         }
 
     finally:
