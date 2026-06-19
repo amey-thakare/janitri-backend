@@ -7,6 +7,7 @@ import time
 from schemas import WaveformRequest
 from services.cnn_service import model
 from services.cnn_service import EXPECTED_LENGTH
+from pydantic import BaseModel
 
 from database import SessionLocal
 from models.prediction import Prediction
@@ -265,6 +266,52 @@ def sdp_trend(patient_id: str):
             }
             for p in predictions
         ]
+
+    finally:
+        db.close()
+
+
+
+class PatientCreate(BaseModel):
+    patient_id: str
+    name: str
+    age: int
+    gestational_week: int
+
+@app.post("/patients")
+def add_patient(patient: PatientCreate):
+
+    db = SessionLocal()
+
+    try:
+
+        existing_patient = (
+            db.query(Patient)
+            .filter(
+                Patient.patient_id == patient.patient_id
+            )
+            .first()
+        )
+
+        if existing_patient:
+            raise HTTPException(
+                status_code=400,
+                detail="Patient already exists"
+            )
+
+        new_patient = Patient(
+            patient_id=patient.patient_id,
+            name=patient.name,
+            age=patient.age,
+            gestational_week=patient.gestational_week
+        )
+
+        db.add(new_patient)
+        db.commit()
+
+        return {
+            "message": "Patient added successfully"
+        }
 
     finally:
         db.close()
