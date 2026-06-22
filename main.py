@@ -92,6 +92,10 @@ def upload_waveform(data: WaveformRequest):
     data.device_id,
     "P001"
 )
+        print("==============")
+        print("DEVICE ID =", data.device_id)
+        print("PATIENT ID =", patient_id)
+        print("==============")    
         patient = (
         db.query(Patient)
         .filter(
@@ -110,6 +114,7 @@ def upload_waveform(data: WaveformRequest):
             )
 
             db.add(patient)
+            print("Saving record for", patient_id)
             db.commit()
 
         record = Prediction(
