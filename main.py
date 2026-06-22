@@ -31,6 +31,19 @@ def home():
         "message": "Janitri FastAPI Running"
     }
 
+current_patient_id = "P001"
+
+@app.post("/set-current-patient/{patient_id}")
+def set_current_patient(patient_id: str):
+
+    global current_patient_id
+
+    current_patient_id = patient_id
+
+    return {
+        "message": f"Current patient set to {patient_id}"
+    }
+
 @app.post("/upload-waveform")
 def upload_waveform(data: WaveformRequest):
 
@@ -78,7 +91,7 @@ def upload_waveform(data: WaveformRequest):
         patient = (
         db.query(Patient)
         .filter(
-        Patient.patient_id == data.patient_id
+        Patient.patient_id == current_patient_id
         )
             .first()
     )
@@ -86,7 +99,7 @@ def upload_waveform(data: WaveformRequest):
         if not patient:
 
             patient = Patient(
-            patient_id=data.patient_id,
+            patient_id=current_patient_id,
             name="Test Patient",
             age=28,
             gestational_week=34
@@ -96,7 +109,7 @@ def upload_waveform(data: WaveformRequest):
             db.commit()
 
         record = Prediction(
-            patient_id=data.patient_id,
+            patient_id=current_patient_id,
             device_id=data.device_id,
             sdp=sdp,
             status=status,
