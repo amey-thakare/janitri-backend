@@ -31,17 +31,17 @@ def home():
         "message": "Janitri FastAPI Running"
     }
 
-current_patient_id = "P001"
+device_patient_map = {
+    "JAN001": "P001"
+}
 
-@app.post("/set-current-patient/{patient_id}")
-def set_current_patient(patient_id: str):
+@app.post("/set-current-patient/{patient_id}/{device_id}")
+def set_current_patient(patient_id: str, device_id: str):
 
-    global current_patient_id
-
-    current_patient_id = patient_id
+    device_patient_map[device_id] = patient_id
 
     return {
-        "message": f"Current patient set to {patient_id}"
+        "message": f"{device_id} assigned to {patient_id}"
     }
 
 @app.post("/upload-waveform")
@@ -88,10 +88,14 @@ def upload_waveform(data: WaveformRequest):
             if 2 <= sdp <= 8
             else "ABNORMAL"
         )
+        patient_id = device_patient_map.get(
+    data.device_id,
+    "P001"
+)
         patient = (
         db.query(Patient)
         .filter(
-        Patient.patient_id == current_patient_id
+        Patient.patient_id == patient_id
         )
             .first()
     )
@@ -99,7 +103,7 @@ def upload_waveform(data: WaveformRequest):
         if not patient:
 
             patient = Patient(
-            patient_id=current_patient_id,
+    patient_id=patient_id,
             name="Test Patient",
             age=28,
             gestational_week=34
@@ -109,7 +113,7 @@ def upload_waveform(data: WaveformRequest):
             db.commit()
 
         record = Prediction(
-            patient_id=current_patient_id,
+            patient_id=patient_id,
             device_id=data.device_id,
             sdp=sdp,
             status=status,
