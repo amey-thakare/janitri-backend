@@ -8,6 +8,7 @@ from schemas import WaveformRequest
 from services.cnn_service import model
 from services.cnn_service import EXPECTED_LENGTH
 from pydantic import BaseModel
+from models.session import Session
 
 from database import SessionLocal
 from models.prediction import Prediction
@@ -34,6 +35,7 @@ def home():
 device_patient_map = {
     "JAN001": "P001"
 }
+current_session_id = None
 
 @app.post("/set-current-patient/{patient_id}/{device_id}")
 def set_current_patient(patient_id: str, device_id: str):
@@ -130,6 +132,25 @@ def upload_waveform(data: WaveformRequest):
 
         db.add(record)
         db.commit()
+        if current_session_id:
+
+            session = (
+        db.query(Session)
+        .filter(
+            Session.id == current_session_id
+        )
+        .first()
+    )
+
+            if session:
+
+                values = json.loads(session.sdp_values)
+
+                values.append(sdp)
+
+                session.sdp_values = json.dumps(values)
+
+                db.commit()
 
         return {
             "sdp": round(sdp, 2),
@@ -329,6 +350,92 @@ def add_patient(patient: PatientCreate):
         return {
             "message": "Patient added successfully"
         }
+
+    finally:
+        db.close()
+
+@app.post("/start-session/{patient_id}")
+def start_session(patient_id: str):
+
+    global current_session_id
+
+    db = SessionLocal()
+
+    try:
+
+        session = Session(
+            patient_id=patient_id,
+            start_time=str(time.time()),
+            end_time="",
+            sdp_values="[]"
+        )
+
+        db.add(session)
+        db.commit()
+        db.refresh(session)
+
+        current_session_id = session.id
+
+        return {
+            "session_id": session.id
+        }
+
+    finally:
+        db.close()
+
+@app.post("/stop-session")
+def stop_session():
+
+    global current_session_id
+
+    db = SessionLocal()
+
+    try:
+
+        session = (
+            db.query(Session)
+            .filter(
+                Session.id == current_session_id
+            )
+            .first()
+        )
+
+        if session:
+            session.end_time = str(time.time())
+            db.commit()
+
+        return {
+            "message": "Session stopped"
+        }
+
+    finally:
+        db.close()
+
+@app.get("/sessions/{patient_id}")
+def get_sessions(patient_id: str):
+
+    db = SessionLocal()
+
+    try:
+
+        sessions = (
+            db.query(Session)
+            .filter(
+                Session.patient_id == patient_id
+            )
+            .order_by(Session.id.desc())
+            .all()
+        )
+
+        return [
+            {
+                "id": s.id,
+                "start_time": s.start_time,
+                "end_time": s.end_time,
+                "sdp_values": json.loads(s.sdp_values)
+            }
+            for s in sessions
+        ]
 
     finally:
         db.close()
