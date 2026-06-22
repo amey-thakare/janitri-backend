@@ -218,9 +218,9 @@ def history(patient_id: str):
 
         return [
             {
-                "sdp": p.sdp,
-                "status": p.status,
-                "timestamp": p.timestamp
+                "waveform": json.loads(p.waveform),
+        "status": p.status,
+        "timestamp": p.timestamp
             }
             for p in predictions
         ]
